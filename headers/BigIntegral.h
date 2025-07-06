@@ -5,7 +5,7 @@
 #include <boost/math/special_functions/bessel.hpp>	// Librerías para las funciones especiales
 #include <boost/math/quadrature/gauss_kronrod.hpp>	// Para hacer la integral de f_NN
 #include <boost/math/policies/policy.hpp>
-
+#include <omp.h>
 
 
 #include <chrono>
@@ -14,15 +14,14 @@
 
 double pi = 3.141592653589793238462643383279502884; 	// Para no importar una librería interea para el pi
 extern double xi_NN_constant;				// Constantes para las funciones
+std::complex<double> i(0.0, 1.0);			// Unidad imaginaria.
 
 
+double bMax = 8.0; 		// Tomamos este bMax como límite de integración en f_NN 
 
-double bMax = 8.0; 		// Tomamos este bMax como límite de integración 
-int N = 50000;			// No intervales en el método de Simpson
-double a = 1e-5;			// Limite inferior
-double h = (bMax - a) / N;		// Cortes
-
-
+double qMax = 4.0;		// Tomamos este qMax como límite de integración en Xi
+double a = 1e-6;
+int N = 10000;			// Intervalos en los que partir el grid en Simpson
 
 //===============================================================================
 //		POTENCIAL A AJUSTAR
@@ -78,7 +77,7 @@ double f_NN_imaginary_integrand(double b, double *params){
 
 
 // Cálculo de la integral f_NN para su componente real
-void calculate_f_NN_integral_Gauss(double q, double* result, double *params){
+std::complex<double> calculate_f_NN_integral_Gauss(double q, double *params){
 	
 	// Creo un nuevo arreglo de parámetros (para poder tener una única variable de integración)
 	// que va a tener tanto los parámetros del potencial como q en su primer elemento
@@ -121,12 +120,64 @@ void calculate_f_NN_integral_Gauss(double q, double* result, double *params){
 	    nullptr     
 	);
 
-	
-	result[0] = real_result; result[1] = imaginary_result;
+
+	// Como f_NN es esta integral multiplicada por i*k (donde podemos ignorar la k pues desaparece en el \Xi), 
+	// simplemente a nuestro resultado r + ib, lo multiplicamos por i para llegar a -b + imaginary_result
+	// result[0] = -imaginary_result; result[1] = real_result;
+	return std::complex<double>(real_result, imaginary_result) * i;
 }
 
 
 
+
+//==========================================================================
+//		INTEGRAL PARA LA XI TOTAL
+//==========================================================================
+
+
+// Integrando de la Xi total
+std::complex<double> XI_integrand(double q, double b, double *params){
+	return q * std::pow( formFactor(q) , 2) * std::cyl_bessel_j(0, q * b) *
+	       calculate_f_NN_integral_Gauss(q, params);
+}
+
+
+// Aquí, vamos a hallar Xi total para un b dado, haciendo la 
+// integral por el método de Simpson
+std::complex<double> calculate_XI_integral(double b, double *params){
+
+	double h = (qMax - a) / N;		// Intervalos a dividir la integral
+	
+	double realSumOdd = 0.0; double imagSumOdd = 0.0;
+	double realSumEven = 0.0; double imagSumEven = 0.0;
+	
+
+	#pragma omp parallel for reduction(+:realSumOdd, imagSumOdd)
+	for (int i = 1; i < N; i +=2){
+		std::complex<double> val = XI_integrand(a + (i*h), b, params);
+
+		realSumOdd += val.real();
+		imagSumOdd += val.imag();
+	}
+
+
+	#pragma omp parallel for reduction(+:realSumEven, imagSumEven)
+	for (int i = 2; i < N; i +=2){
+		std::complex<double> val = XI_integrand(a + (i*h), b, params);
+
+		realSumEven += val.real();
+		imagSumEven += val.imag();
+	}
+
+	
+	std::complex<double> sumOdd(realSumOdd, imagSumOdd);
+	std::complex<double> sumEven(realSumEven, imagSumEven);
+
+
+	return (h / 3.0) * (XI_integrand(a, b, params) + XI_integrand(qMax, b, params) + (4.0 * sumOdd) + (2.0 * sumEven));
+}
+
+	
 
 
 
@@ -145,18 +196,13 @@ double runHeader(void){
 //	}
 
 	auto start2 = std::chrono::high_resolution_clock::now();
-	#pragma omp parallel for 
-	for (int i = 1; i < 1000; i++){
 
-		// double integral_val[2];
-		// calculate_f_NN_integral_Gauss(i / 500, integral_val, params);
+	for (int i = 1; i < 10; i++){
 
-		calculate_f_NN_imaginary_integral_withGauss(i / 500, params);
-		calculate_f_NN_imaginary_integral_withGauss(i / 500, params);
-		if (i % 250 == 0){
-			// std::cout << "Parte real: " << integral_val[0] << std::endl;
-			//std::cout << "Parte imaginaria: " << integral_val[1] << std::endl;
-		}
+		std::complex<double> val = calculate_XI_integral(10, params);
+		std::cout << "qMax:" << qMax << " || N: " << N << std::endl;
+		N /= 2;
+		std::cout << val.real() << "+ " << val.imag() << "i" << std::endl;
 	}
 
 	auto end2 = std::chrono::high_resolution_clock::now();
