@@ -15,13 +15,13 @@
 double pi = 3.141592653589793238462643383279502884; 	// Para no importar una librería interea para el pi
 extern double xi_NN_constant;				// Constantes para las funciones
 std::complex<double> i(0.0, 1.0);			// Unidad imaginaria.
-
+extern double AB;
 
 double bMax = 8.0; 		// Tomamos este bMax como límite de integración en f_NN 
 
 double qMax = 4.0;		// Tomamos este qMax como límite de integración en Xi
 double a = 1e-6;
-int N = 10000;			// Intervalos en los que partir el grid en Simpson
+int N = 100;			// Intervalos en los que partir el grid en Simpson
 
 //===============================================================================
 //		POTENCIAL A AJUSTAR
@@ -174,7 +174,7 @@ std::complex<double> calculate_XI_integral(double b, double *params){
 	std::complex<double> sumEven(realSumEven, imagSumEven);
 
 
-	return (h / 3.0) * (XI_integrand(a, b, params) + XI_integrand(qMax, b, params) + (4.0 * sumOdd) + (2.0 * sumEven));
+	return AB * (h / 3.0) * (XI_integrand(a, b, params) + XI_integrand(qMax, b, params) + (4.0 * sumOdd) + (2.0 * sumEven));
 }
 
 	
@@ -197,11 +197,12 @@ double runHeader(void){
 
 	auto start2 = std::chrono::high_resolution_clock::now();
 
-	for (int i = 1; i < 10; i++){
+	
+	#pragma omp parallel for 
+	for (int i = 1; i < 125; i++){
 
-		std::complex<double> val = calculate_XI_integral(10, params);
+		std::complex<double> val = calculate_XI_integral(0.1, params);
 		std::cout << "qMax:" << qMax << " || N: " << N << std::endl;
-		N /= 2;
 		std::cout << val.real() << "+ " << val.imag() << "i" << std::endl;
 	}
 
