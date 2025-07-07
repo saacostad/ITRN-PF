@@ -4,8 +4,8 @@
 
 // INCLUSIÓN DE LAS LIBRERÍAS PROPIAS
 #include "headers/CONSTANTS.h"				// Para las constantes del sistema
-#include "headers/BigIntegral.h"
-
+#include "headers/BigIntegral.h"			// En donde se encuentran las integrales feas
+#include "headers/AuxiliarFunction.h"			// En donde están las funciones de Coulomb y el bl
 
 
 //-------------------------------------------------------
@@ -22,7 +22,7 @@ double v_cm = K / std::sqrt( K*K + M*M );				// Velocidad en el centro de masa
 double E_tot_NN = mN + E_NN_lab;					// E total por nucleón
 double k = std::sqrt( E_tot_NN * E_tot_NN - mN * mN );			// Momento por nucleón
 double eta = (Z * Z * (1.0 / 137.0) * mu) / (K);			// Parámetro de Sommerfield
-
+double AB = A * A;
 
 
 //------------------------------------------------------	
@@ -33,7 +33,12 @@ double eta = (Z * Z * (1.0 / 137.0) * mu) / (K);			// Parámetro de Sommerfield
 double xi_NN_constant = -1.0 / (v_cm);
 
 int main(void){
-	
-	runHeader();
+
+//	for (int i = 0; i < 300; i++){
+//		double bl = (1.0 / K) * (eta + std::sqrt( (eta*eta) + ((i + 0.5)*(i + 0.5)) ));
+//		std::cout << "l = " << i << " ||  bl = " << bl << std::endl;
+//	}
+
+	runHeaderAuxiliar();
 	return 0;
 }
