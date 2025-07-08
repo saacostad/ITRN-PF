@@ -7,7 +7,8 @@
 
 
 extern double eta, k;			    // Esta se va a necesitar bastante como parámetro global aquí
-std::complex<double> fC_constant;			    // Pre-llamo esta variable para no tener problemas con el compilador
+extern std::complex<double> fC_constant;
+
 
 //========================================================================================
 //	FUNCIONES GAMMA Y ARGUMENTO DE GAMMA
@@ -72,7 +73,7 @@ std::complex<double> CoulombScatteringAmplitude(double theta){
 //==================================================================
 void runHeaderAuxiliar() {
     // Por rendimiento, vamos a obtener la constante que aparece en el corrimiento de fase de Coulomb
-    fC_constant = std::complex<double>(-(eta / (2 * k)), 0.0) * std::exp(std::complex<double>(0.0, 1.0) * CoulombPhaseShift(0.0));
+    //fC_constant = std::complex<double>(-(eta / (2 * k)), 0.0) * std::exp(std::complex<double>(0.0, 1.0) * CoulombPhaseShift(0.0));
     // TODO: Cuando vaya a crear la función Fel, tengo que agregar esta constante en su definición para que se corra y tenerla guardada
 
     std::complex<double> z (1.0, -1.0);
