@@ -2,16 +2,13 @@
 #include <boost/math/special_functions/legendre.hpp>
 #include <cmath>					// Para matemáticas en general
 
-// INCLUSIÓN DE LAS LIBRERÍAS PROPIAS
-#include "headers/CONSTANTS.h"				// Para las constantes del sistema
-#include "headers/BigIntegral.h"			// En donde se encuentran las integrales feas
-#include "headers/AuxiliarFunction.h"			// En donde están las funciones de Coulomb y el bl
 
 
 //-------------------------------------------------------
 //		CONSTANTES DEL SISTEMA 
 //-------------------------------------------------------
 
+#include "headers/CONSTANTS.h"				// Para las constantes del sistema
 double E_NN_lab = 25.0;
 
 double M = mN * A;							// Masa de cada núcleo
@@ -24,21 +21,43 @@ double k = std::sqrt( E_tot_NN * E_tot_NN - mN * mN );			// Momento por nucleón
 double eta = (Z * Z * (1.0 / 137.0) * mu) / (K);			// Parámetro de Sommerfield
 double AB = A * A;
 
-
+// INCLUSIÓN DE LAS LIBRERÍAS PROPIAS
+#include "headers/BigIntegral.h"			// En donde se encuentran las integrales feas
+#include "headers/AuxiliarFunction.h"			// En donde están las funciones de Coulomb y el bl
+#include "headers/BigSummatory.h"			// En este header se define el Sel y el Fel
 //------------------------------------------------------	
 //		CONSTANTES DE LAS FUNCIONES 
 //------------------------------------------------------	
 
 
-double xi_NN_constant = -1.0 / (v_cm);
+double xi_NN_constant = -1.0 / (v_cm * hbar);
+std::complex<double> fC_constant = std::complex<double>(-(eta / (2 * k)), 0.0) * std::exp(std::complex<double>(0.0, 1.0) * CoulombPhaseShift(0.0));
+
+
+
+
+double CrossSection(double theta, double *params){
+	return std::norm( Fel(theta, params) );
+}
+
+
+
 
 int main(void){
-
+	omp_set_nested(1);
 //	for (int i = 0; i < 300; i++){
 //		double bl = (1.0 / K) * (eta + std::sqrt( (eta*eta) + ((i + 0.5)*(i + 0.5)) ));
 //		std::cout << "l = " << i << " ||  bl = " << bl << std::endl;
+//	
 //	}
+	
 
-	runHeaderAuxiliar();
+	double params[4] = {-281.5, 0.0, 0.99, 1};
+	for (int i = 1; i <= 41; i++){
+		std::cout << double(i) << "\t" <<  CrossSection(double(i), params) << std::endl;
+	}
+
+//	runHeaderAuxiliar();	
+	//runSumHeader();
 	return 0;
 }
