@@ -9,35 +9,50 @@
 //-------------------------------------------------------
 
 #include "headers/CONSTANTS.h"				// Para las constantes del sistema
-double E_NN_lab = 25.0;
+double E_NN_lab = 85.0;
 
-double M = mN * A;							// Masa de cada núcleo
-double E_lab = E_NN_lab * A;						// Energía total del lab
-double E_cm = std::sqrt( std::pow( 2 * M , 2) + (2 * M  * E_lab) );	// Esto es directamente considerando la E. relativista
-double K = std::sqrt( std::pow(E_cm,2) - std::pow(2*M,2) ) / 2.0;	// Momento en el centro de masa
-double v_cm = K / std::sqrt( K*K + M*M );				// Velocidad en el centro de masa
-double E_tot_NN = mN + E_NN_lab;					// E total por nucleón
-double k = std::sqrt( E_tot_NN * E_tot_NN - mN * mN );			// Momento por nucleón
-double eta = (Z * Z * (1.0 / 137.0) * mu) / (K);			// Parámetro de Sommerfield
+// double M = mN * A;							// Masa de cada núcleo
+// double E_lab = E_NN_lab * A;						// Energía total del lab
+// double E_cm = std::sqrt( std::pow( 2 * M , 2) + (2 * M  * E_lab) );	// Esto es directamente considerando la E. relativista
+// double K = std::sqrt( std::pow(E_cm,2) - std::pow(2*M,2) ) / 2.0;	// Momento en el centro de masa
+// double v_cm = K / std::sqrt( K*K + M*M );				// Velocidad en el centro de masa
+// double E_tot_NN = mN + E_NN_lab;					// E total por nucleón
+// double k = std::sqrt( E_tot_NN * E_tot_NN - mN * mN );			// Momento por nucleón
+// double eta = (Z * Z * alpha * mu) / (K);			// Parámetro de Sommerfield
+// double AB = A * A;
+// double waveNumber = std::sqrt(2 * mu * E_cm) / hbar;
+
+
+double E_lab = E_NN_lab * A;
+double E_cm = E_lab * 0.5;
+double K = std::sqrt(2.0 * mu * E_cm ) / hbar;
+double v_cm = (K * hbar) / mu;
+
+double k = std::sqrt(2 * mN * E_lab) / hbar;
+
+double eta = (Z * Z * e2) / (hbar * v_cm);
+
+double waveNumber = std::sqrt(2 * mu * E_cm) / hbar;
 double AB = A * A;
 
-// INCLUSIÓN DE LAS LIBRERÍAS PROPIAS
-#include "headers/BigIntegral.h"			// En donde se encuentran las integrales feas
-#include "headers/AuxiliarFunction.h"			// En donde están las funciones de Coulomb y el bl
-#include "headers/BigSummatory.h"			// En este header se define el Sel y el Fel
+
 //------------------------------------------------------	
 //		CONSTANTES DE LAS FUNCIONES 
 //------------------------------------------------------	
 
 
+#include "headers/AuxiliarFunction.h"			// En donde están las funciones de Coulomb y el bl
 double xi_NN_constant = -1.0 / (v_cm * hbar);
-std::complex<double> fC_constant = std::complex<double>(-(eta / (2 * k)), 0.0) * std::exp(std::complex<double>(0.0, 1.0) * CoulombPhaseShift(0.0));
 
+
+// INCLUSIÓN DE LAS LIBRERÍAS PROPIAS
+#include "headers/BigIntegral.h"			// En donde se encuentran las integrales feas
+#include "headers/BigSummatory.h"			// En este header se define el Sel y el Fel
 
 
 
 double CrossSection(double theta, double *params){
-	return std::norm( Fel(theta, params) );
+	return std::norm( Fel(theta, params) / CoulombScatteringAmplitude(theta));
 }
 
 
@@ -45,19 +60,15 @@ double CrossSection(double theta, double *params){
 
 int main(void){
 	omp_set_nested(1);
-//	for (int i = 0; i < 300; i++){
-//		double bl = (1.0 / K) * (eta + std::sqrt( (eta*eta) + ((i + 0.5)*(i + 0.5)) ));
-//		std::cout << "l = " << i << " ||  bl = " << bl << std::endl;
-//	
-//	}
-	
+	// double params[4] = {-281.5, 0.0, 0.99, 1};
+	double params[4] = {-67.5, 689.6, 0.72, 2.55}; // E_nn_lab = 85.0
 
-	double params[4] = {-281.5, 0.0, 0.99, 1};
-	for (int i = 1; i <= 41; i++){
-		std::cout << double(i) << "\t" <<  CrossSection(double(i), params) << std::endl;
+	std::cerr << v_cm << std::endl;	
+	for (double i = 1; i <= 14; i += 0.05){
+		std::cerr << "Iteración " << i << std::endl;
+		std::cout << double(i) << "\t" << CrossSection(double(i * pi / 180.0), params) << std::endl;
 	}
 
-//	runHeaderAuxiliar();	
-	//runSumHeader();
+
 	return 0;
 }

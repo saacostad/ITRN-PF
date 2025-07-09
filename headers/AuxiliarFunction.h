@@ -57,11 +57,10 @@ double CoulombPhaseShift(double l){
 
 // Amplitud de scattering
 std::complex<double> CoulombScatteringAmplitude(double theta){
-    
-    double thetad = theta / 2.0;
-    return std::exp(std::complex<double>(0.0, -eta * std::log( std::pow( std::sin(thetad) ,2.0) ))) * 
-	   (std::complex<double>( (1.0 / std::pow( std::sin(thetad) ,2.0)) ,0.0)) * 
-	   fC_constant;
+    double amplitude = -eta / (2 * K * std::pow(std::sin(theta / 2.0), 2.0));
+    std::complex<double> sigmaExp = std::exp( std::complex<double> (0.0, 2.0 * CoulombPhaseShift(0.0)) );
+    std::complex<double> exponential = std::exp( std::complex<double> (0.0, -eta * std::log( std::pow(std::sin(theta / 2.0), 2) )) );
+    return amplitude * sigmaExp * exponential;	
 }
 
 
@@ -79,7 +78,6 @@ void runHeaderAuxiliar() {
     std::complex<double> z (1.0, -1.0);
     std::complex<double> gammaVal = argument_complex_gamma(z);
 
-    std::cout << fC_constant << " || " << CoulombScatteringAmplitude(0.1) << std::endl;
     std::cout << eta << " || " << k << std::endl;
     return;
 }

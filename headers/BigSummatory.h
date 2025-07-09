@@ -20,7 +20,7 @@ using std::exp;
 
 
 
-int lMax = 150;
+int lMax = 300;
 
 //==================================================================
 //	CORRIMIENTO DE FASE TOTAL
@@ -34,7 +34,7 @@ complex Sel(double b, double *params){
 //	DEFINICIÓN DE LA bl
 //==================================================================
 double bl(double l){
-    return inK * ( eta + std::sqrt( (eta * eta) + (l + 0.5)*(l + 0.5) ) ) ;
+    return inK * ( eta + std::sqrt( (eta * eta) + ((l + 0.5)*(l + 0.5)) ) ) ;
 }
 
 
@@ -45,12 +45,14 @@ double bl(double l){
 //
 
 complex FelSummand(int l, double theta, double *params){
-    return (2.0*double(l) + 1.0) * exp( 2.0 * i * CoulombPhaseShift(double(l))) * (1.0 - Sel( bl(double(l)), params )) * boost::math::legendre_p(l, std::cos(theta)) * 2.0;
+    return (2.0*double(l) + 1.0) * exp( 2.0 * complex(0.0, 1.0) * CoulombPhaseShift(double(l))) * (1.0 - Sel( bl(double(l)), params )) * boost::math::legendre_p(l, std::cos(theta));
 }
 
 complex Fel(double theta, double *params){
+
+    // return CoulombScatteringAmplitude(theta);
     complex Fc = CoulombScatteringAmplitude(theta) + CoulombScatteringAmplitude(pi - theta);
-    complex constant(0.0, 1.0 / (2.0 * K));
+    complex constant(0.0, 1.0 / (K));
 
     
     double realSum = 0.0;
@@ -72,7 +74,7 @@ complex Fel(double theta, double *params){
 //    std::cout << "Sumatory: " << realSum << " + " << imagSum << "i" << std::endl;
 //    std::cout << "Constant: " << constant << std::endl;
 //   std::cout << "Fc: " << Fc << std::endl;
-
+    
     return complex(realSum, imagSum) * constant + Fc;
 }
 
