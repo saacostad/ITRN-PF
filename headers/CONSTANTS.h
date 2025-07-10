@@ -13,7 +13,7 @@ double mN = 931.5;		// Masa del nucleón
 
 double mu = 5589.0;		// Masa reducida
 
-
+double alpha = 1.0 / 137.036;
 
 
 double formFactor(double q){

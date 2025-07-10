@@ -101,10 +101,23 @@ std::vector<double> readCSVAngles(void){
 //------------------------------------------------------	
 //		FUNCIÓN MAIN
 //------------------------------------------------------	
-int main(void){
+int main(int argc, char *argv[]){
+
 	omp_set_nested(1);
 	// double params[4] = {-281.5, 0.0, 0.99, 1};
-	double params[4] = {-67.5, 689.6, std::sqrt(0.72), std::sqrt(2.55)}; // E_nn_lab = 85.0
+	//
+	
+	double params[4];
+	if (argc == 1){
+		params[0] = -67.5; params[1] =  689.6; params[2] = std::sqrt(0.72); params[3] = std::sqrt(2.55); // E_nn_lab = 85.0
+	}  
+	else if (argc == 5){
+		params[0] = std::stod(argv[1]); params[1] = std::stod(argv[2]); params[2] = std::stod(argv[3]); params[3] = std::stod(argv[4]);
+	}
+	else {
+		std::cerr << "Brother, use the proper params wtf" << std::endl;
+		return 1;
+	}
 
 
 	// double params[5] = {1.0,-67.5, 689.6, 0.72, 2.55}; // E_nn_lab = 85.0
@@ -116,16 +129,16 @@ int main(void){
 	
 	// return 0;
 	
-	std::cerr << "eta " << eta << "MeV" << std::endl;
-	std::cerr << "K " << K << "MeV" << std::endl;
-	std::cerr << "vcm " << v_cm << "MeV" << std::endl;
+	// std::cerr << "eta " << eta << "MeV" << std::endl;
+	// std::cerr << "K " << K << "MeV" << std::endl;
+	// std::cerr << "vcm " << v_cm << "MeV" << std::endl;
 
-	std::cerr << "Energía lab. por nucleón: " << E_NN_lab << "MeV" << std::endl;
+	// std::cerr << "Energía lab. por nucleón: " << E_NN_lab << "MeV" << std::endl;
 	// std::cerr << "Energía lab. total: " << E_lab << "MeV" << std::endl;	
-	std::cerr << "b Máximo para f_nn: " << bMax << std::endl;
-	std::cerr << "q Máximo para Xi: " << qMax << std::endl;
-	std::cerr << "Particiones en la integral de Xi: " << N << std::endl;
-	std::cerr << "l Máximo a usar: " << lMax << std::endl;
+	// std::cerr << "b Máximo para f_nn: " << bMax << std::endl;
+	// std::cerr << "q Máximo para Xi: " << qMax << std::endl;
+	// std::cerr << "Particiones en la integral de Xi: " << N << std::endl;
+	// std::cerr << "l Máximo a usar: " << lMax << std::endl;
 
 
 
@@ -138,9 +151,10 @@ int main(void){
 		
 
 	std::vector<double> angles = readCSVAngles();
+	std::cerr << "Trying once again" << std::endl; 
 
 	for (double value : angles){
-		std::cerr << "Calculado theta = " << value << std::endl;
+		// std::cerr << "Calculado theta = " << value << std::endl;
 		std::cout << value << "\t" << CrossSection(double(value * pi / 180.0), params) << std::endl;
 	}
 
