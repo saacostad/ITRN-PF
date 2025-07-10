@@ -65,6 +65,10 @@ std::complex<double> CoulombScatteringAmplitude(double theta){
 
 
 
+double RelRutherfordCrossSection(double theta){
+    return std::pow( ((Z*Z * e2) / (2 * gammaL * M * v_cm * v_cm * std::pow(std::sin(theta / 2.0), 2)))  , 2);
+}
+
 
 
 //==================================================================
