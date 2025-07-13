@@ -1,23 +1,50 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# Read the tab-separated file
-df = pd.read_csv("data.tsv", sep="\t")
+energy = "25"
 
-# Check column names (optional)
-print(df.head())
+# Read the tab-separated file
+df = pd.read_csv("PaperData" + energy + "MeV.tsv", sep="\t", header=None)
+extracted = pd.read_csv("ExtractedData" + energy + "MeV.csv", sep=",", header=None)
+dfFitted = pd.read_csv("FittedData" + energy + "MeV.tsv", sep="\t", header=None)
 
 # Plot: y-axis in logarithmic scale
-plt.figure(figsize=(8, 6))
-plt.plot(df.iloc[:, 0], df.iloc[:, 1], marker="o", linestyle="-")
+plt.figure(figsize=(10, 6))
+plt.plot(
+    df.iloc[:, 0],
+    df.iloc[:, 1],
+    linestyle="-",
+    color="black",
+    linewidth=3.0,
+    label="Paper parameters",
+)
+plt.plot(
+    dfFitted.iloc[:, 0],
+    dfFitted.iloc[:, 1],
+    linestyle="-",
+    color="blue",
+    linewidth=3.0,
+    label="Fitted parameters",
+)
+plt.scatter(
+    extracted.iloc[:, 0],
+    extracted.iloc[:, 1],
+    marker="o",
+    linestyle="-",
+    color="red",
+    label="Exp. data",
+)
 
 plt.xscale("linear")  # or 'log' if you also want x in log scale
 plt.yscale("log")
 
-plt.xlabel("X")
-plt.ylabel("Y")
-plt.title("Plot from data.tsv (logarithmic scale on Y)")
+plt.xlabel(r"$\theta$ [$^\circ$]", fontsize=16)
+plt.ylabel(r"$d\sigma / d\sigma_R$", fontsize=16)
+plt.title(r"Cross-Section 12C-12C with $E_{lab}/A =$" + energy + "  [MeV]", fontsize=16)
 plt.grid(True, which="both", ls="--")
 
+plt.tick_params(axis="both", which="major", labelsize=16)
+plt.legend(fontsize=14)
 plt.tight_layout()
-plt.show()
+plt.savefig("Images/" + energy + "MeV.png")  # Saves as PNG in the current directory
+plt.close()  # Close the figure to free memory
