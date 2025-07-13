@@ -20,7 +20,7 @@ using std::exp;
 
 
 
-int lMax = 110;
+int lMax = 180;
 
 //==================================================================
 //	CORRIMIENTO DE FASE TOTAL

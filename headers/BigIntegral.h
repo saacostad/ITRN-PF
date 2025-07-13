@@ -20,6 +20,7 @@ extern double AB;
 
 				// bMax usual 6.0
 double bMax = 5.5; 		// Tomamos este bMax como límite de integración en f_NN 
+//
 
 double qMax = 4.0;		// Tomamos este qMax como límite de integración en Xi
 double a = 1e-6;
