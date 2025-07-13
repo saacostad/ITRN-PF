@@ -12,7 +12,7 @@
 //-------------------------------------------------------
 
 #include "headers/CONSTANTS.h"				// Para las constantes del sistema
-double E_NN_lab = 85.0;
+double E_NN_lab = 200.0;
 double M = mN * A;							// Masa de cada núcleo
 
 double gammaL;
@@ -57,7 +57,6 @@ double xi_NN_constant = -1.0 / (v_cm * hbar);
 #include "headers/BigSummatory.h"			// En este header se define el Sel y el Fel
 
 
-std::string path = "ExtractedData85MeV.csv";
 
 //------------------------------------------------------	
 //		CROSS-SECTION
@@ -71,7 +70,7 @@ double CrossSection(double theta, double *params){
 //------------------------------------------------------	
 //		PARA LEER PARÁMETROS DE ENTRADA
 //------------------------------------------------------	
-std::vector<double> readCSVAngles(void){
+std::vector<double> readCSVAngles(std::string path){
 	std::ifstream file(path);
 	if (!file.is_open()) {
 		std::cerr << "Error opening file!" << std::endl;
@@ -107,57 +106,50 @@ int main(int argc, char *argv[]){
 	// double params[4] = {-281.5, 0.0, 0.99, 1};
 	//
 	
+	bool fit = 1;
+	std::string path;
+	double maxAngle;
+
 	double params[4];
 	if (argc == 1){
 		params[0] = -67.5; params[1] =  689.6; params[2] = std::sqrt(0.72); params[3] = std::sqrt(2.55); // E_nn_lab = 85.0
+		path = "ExtractedData30MeV.csv";
 	}  
 	else if (argc == 5){
 		params[0] = std::stod(argv[1]); params[1] = std::stod(argv[2]); params[2] = std::stod(argv[3]); params[3] = std::stod(argv[4]);
+		path = "ExtractedData200MeV.csv";
+	}
+	else if (argc == 7){
+		params[0] = std::stod(argv[3]); params[1] = std::stod(argv[4]); params[2] = std::stod(argv[5]); params[3] = std::stod(argv[6]);
+		if (std::string(argv[1]) == "-f" || std::string(argv[2]) == "--fit"){
+			// std::string path = "ExtractedData85MeV.csv";
+			path = argv[2];
+		}
+		else if(std::string(argv[1]) == "-g" || std::string(argv[2]) == "--graph"){
+			fit = 0;
+			maxAngle = std::stod(argv[2]);
+		}
 	}
 	else {
 		std::cerr << "Brother, use the proper params wtf" << std::endl;
 		return 1;
 	}
 
-
-	// double params[5] = {1.0,-67.5, 689.6, 0.72, 2.55}; // E_nn_lab = 85.0
-	// for (double j = 1.0; j <= 20; j += 1.0){
-	// 	std::cout << "j = " << j << std::endl;
-	// 	std::cout << "RealfNN(b =" << j << ") = " << f_NN_real_integrand(j, params) << std::endl;
-	// 	std::cout << "ImagfNN(b =" << j << ") = " << f_NN_imaginary_integrand(j, params) << std::endl;
-	// }
 	
-	// return 0;
-	
-	// std::cerr << "eta " << eta << "MeV" << std::endl;
-	// std::cerr << "K " << K << "MeV" << std::endl;
-	// std::cerr << "vcm " << v_cm << "MeV" << std::endl;
+	if (fit == 1){
+		std::vector<double> angles = readCSVAngles(path);
 
-	// std::cerr << "Energía lab. por nucleón: " << E_NN_lab << "MeV" << std::endl;
-	// std::cerr << "Energía lab. total: " << E_lab << "MeV" << std::endl;	
-	// std::cerr << "b Máximo para f_nn: " << bMax << std::endl;
-	// std::cerr << "q Máximo para Xi: " << qMax << std::endl;
-	// std::cerr << "Particiones en la integral de Xi: " << N << std::endl;
-	// std::cerr << "l Máximo a usar: " << lMax << std::endl;
-
-
-
-	// for (double i = 0.5; i <= 14; i += 0.25){
-	// 	std::cerr << "Calculado theta = " << i << std::endl;
-	// 	std::cout << double(i) << "\t" << CrossSection(double(i * pi / 180.0), params) << std::endl;
-	// }
-
-
-		
-
-	std::vector<double> angles = readCSVAngles();
-	std::cerr << "Trying once again" << std::endl; 
-
-	for (double value : angles){
-		// std::cerr << "Calculado theta = " << value << std::endl;
-		std::cout << value << "\t" << CrossSection(double(value * pi / 180.0), params) << std::endl;
+		for (double value : angles){
+			// std::cerr << "Calculado theta = " << value << std::endl;
+			std::cout << value << "\t" << CrossSection(double(value * pi / 180.0), params) << std::endl;
+		}
+	} else {
+		for (double value = 0.5; value <= maxAngle; value += 0.05){
+			std::cout << value << "\t" << CrossSection(double(value * pi / 180.0), params) << std::endl;
+		}
 	}
 
 
 	return 0;
+	
 }
